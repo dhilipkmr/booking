@@ -31,3 +31,26 @@
     transform: rotate(360deg);
   }
 }
+
+.cardBlock {
+  width: 200px;
+  min-height: 50px;
+  border: 2px solid green;
+  margin: 50px auto;
+  margin-bottom: 10px;
+  padding: 5px;
+  text-align: center;
+}
+.cardBlockSmall {
+  width: 300px;
+  min-height: 30px;
+  border: 2px solid grey;
+  margin: 10px auto;
+  margin-bottom: 10px;
+  padding: 5px;
+  text-align: center;
+}
+
+.txtCenter {
+  text-align: center
+}
