@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+// import App from './App';
 import {Router, Route, IndexRoute, hashHistory} from 'react-router';
 import AddMeetings from './Component/AddMeeting'
 import Home from './Component/Home';

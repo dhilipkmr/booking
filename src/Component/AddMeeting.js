@@ -1,8 +1,8 @@
 import React from 'react'
 import axios from 'axios';
-import {hashHistory} from 'react-router';
+// import isFreeRoom from '../utils';
 
-export default class AddMeetings extends React.Component {
+export default class addMeetings extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -17,11 +17,20 @@ export default class AddMeetings extends React.Component {
       method: 'POST',
       data: {
         query: `
-          {
-            Buildings {
+        {
+          Buildings {
+            name
+            meetingRooms {
               name
+              meetings {
+                title
+                date
+                startTime
+                endTime
+              }
             }
-          }`
+          }
+        }`
       }
     }).then((resp) => {
      this.setState({ buildings: resp.data.data.Buildings});
@@ -34,6 +43,11 @@ export default class AddMeetings extends React.Component {
     const end = this.refs.end.value.toString();
     const building = this.refs.selector.value.toString();
     const title = this.refs.title.value.toString();
+    // this.state.buildings.forEach((building) => {
+    //   building.meetingRooms.forEach((meetingRoom) => {
+    //     isFreeRoom();
+    //   });
+    // });
     axios({
       url: 'http://smart-meeting.herokuapp.com/graphql',
       method: 'POST',

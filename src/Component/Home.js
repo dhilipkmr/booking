@@ -1,17 +1,19 @@
-import React from 'react';
+import React, {Component} from 'react';
 import axios from 'axios';
 import {hashHistory} from 'react-router';
 import '../App.css';
+import {isFreeRoom} from '../utils';
+import AddMeetings from './AddMeeting';
 
-export default class Home extends React.Component {
+export default class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      Buildings: null
+      Buildings: null,
+      showAddMeeting: false
     }
     this.loadAvailabilitySummary = this.loadAvailabilitySummary.bind(this);
     this.constructData = this.constructData.bind(this);
-    this.isFree = this.isFree.bind(this);
   }
 
   componentDidMount() {
@@ -37,41 +39,9 @@ export default class Home extends React.Component {
       }
     }).then((resp) => {
      this.constructData(resp.data.data.Buildings);
+    },(err) => {
+      // console
     });
-  }
-
-  isFree(meetingRoom) {
-    let isFree = 1;
-    let totalMeetingsToday = 0;
-    meetingRoom.meetings.forEach((meetingData) => {
-      // if (isFree) {
-        const day = meetingData.date.split('/')[0];
-        const month = meetingData.date.split('/')[1];
-        const year = meetingData.date.split('/')[2];
-        let ind0 = meetingData.startTime.split(':')[0];
-        let ind1 = meetingData.startTime.split(':')[1];
-        const startHrs = parseInt(ind0);
-        const startMin = parseInt(ind1);
-        ind0 = meetingData.endTime.split(':')[0];
-        ind1 = meetingData.endTime.split(':')[1];
-        const endHrs = parseInt(ind0);
-        const endMin = parseInt(ind1);
-        const currentDate = new Date();
-        const currentHours = currentDate.getHours();
-        const currentMin = currentDate.getMinutes();
-        if (day === currentDate.getDay() && month === currentDate.getMonth && year === currentDate.getFullYear()) {
-          if (currentHours < startHrs || currentHours > endHrs || (currentHours === startHrs && currentMin > startMin) || (currentHours === endHrs && currentMin > endMin)) {
-
-          } else {
-            isFree = 0;
-          }
-          totalMeetingsToday = totalMeetingsToday + 1;
-        } else {
-          isFree = 1;
-        } 
-      // }
-    });
-    return {isFree, totalMeetingsToday};
   }
 
   constructData(buildings) {
@@ -84,7 +54,7 @@ export default class Home extends React.Component {
       buildings.forEach(building => {
         meetingRoomsCount = meetingRoomsCount + building.meetingRooms.length;
         building.meetingRooms.forEach((meetingRoom) => {
-          const {isFree, totalMeetingsToday} = this.isFree(meetingRoom);
+          const {isFree, totalMeetingsToday} = isFreeRoom(meetingRoom);
           freeRooms = freeRooms + isFree;
           totalMeetNow = (!isFree ? totalMeetNow + 1 : totalMeetNow);
           totalMeetingsPresentDay += totalMeetingsToday; 
@@ -104,34 +74,37 @@ export default class Home extends React.Component {
   loadAvailabilitySummary() {
     const {buildings, buildingsCount, meetingRoomsCount, freeRooms, totalMeetingsPresentDay, totalMeetNow} = this.state;
     return (
-      <div className="txtCenter">
-        <div className="cardBlock">
-          <strong>Buildings</strong>
-          <div>{'Total: ' + buildingsCount}</div>
+      <React.Fragment>
+        <h1>Meeting Room Summary</h1>
+        <div className="txtCenter">
+          <div className="cardBlock">
+            <strong>Buildings</strong>
+            <div>{'Total: ' + buildingsCount}</div>
+          </div>
+          <div className="cardBlock">
+            <strong>Rooms</strong>
+            <div>{'Total: ' + meetingRoomsCount}</div>
+            <div>{'Free now: ' + freeRooms}</div>
+          </div>
+          <div className="cardBlock">
+            <strong>Meetings</strong>
+            <div>{'Total: ' + totalMeetingsPresentDay + ' today'}</div>
+            <div>{'Total ' + totalMeetNow + ' going on now'}</div>
+          </div>
+          <p className="txtCenter">
+            <button onClick={() => this.setState({showAddMeeting: true})}>Add A meeting</button>
+          </p>
         </div>
-        <div className="cardBlock">
-          <strong>Rooms</strong>
-          <div>{'Total: ' + meetingRoomsCount}</div>
-          <div>{'Free now: ' + freeRooms}</div>
-        </div>
-        <div className="cardBlock">
-          <strong>Meetings</strong>
-          <div>{'Total: ' + totalMeetingsPresentDay + ' today'}</div>
-          <div>{'Total ' + totalMeetNow + ' going on now'}</div>
-        </div>
-        <p className="txtCenter">
-          <button onClick={() => hashHistory.push('add_meetings')}>Add A meeting</button>
-        </p>
-      </div>
+      </React.Fragment>
     );
   }
 
   render() {
-    const {buildings} = this.state;
+    const {buildings, showAddMeeting} = this.state;
     return(
       <div  className="txtCenter">
-        <h1>Meeting Room Summary</h1>
-        {buildings && this.loadAvailabilitySummary()}
+        {!showAddMeeting && buildings && this.loadAvailabilitySummary()}
+        {showAddMeeting && <AddMeetings/>}
       </div>);
   }
 }
